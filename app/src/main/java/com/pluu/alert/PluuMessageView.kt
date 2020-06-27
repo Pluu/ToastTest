@@ -22,8 +22,4 @@ class PluuMessageView @JvmOverloads constructor(
     fun setText(text: String) {
         binding.tvMessage.text = text
     }
-
-    override fun setBackgroundColor(color: Int) {
-        binding.contentRoot.setBackgroundColor(color)
-    }
 }

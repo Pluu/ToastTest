@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -36,7 +35,6 @@ class PluuMeesageAlert private constructor(
                 if (builder.gravity.isTop()) Gravity.TOP else Gravity.BOTTOM
             )
         )
-
         messageView.doOnGlobalLayout {
             val directionOffset = if (builder.gravity.isTop()) {
                 -1
@@ -44,37 +42,49 @@ class PluuMeesageAlert private constructor(
                 1
             }
             translationY = measuredHeight.toFloat() * directionOffset
-            animate()
-                .translationY(0f)
-                .setDuration(200L)
-                .setInterpolator(FastOutSlowInInterpolator())
-                .withEndAction {
-                    animate()
-                        .translationY(measuredHeight.toFloat() * directionOffset)
-                        .setStartDelay(1500L)
-                        .setDuration(200L)
-                        .setInterpolator(FastOutSlowInInterpolator())
-                        .withEndAction {
-                            clearAnimation()
-                            isGone = true
-                            builder.parent.removeView(this)
-                        }
-                        .start()
-                }
-                .start()
+            slideInAnimation(this, directionOffset)
         }
+    }
+
+    private fun slideInAnimation(view: View, directionOffset: Int) {
+        view.animate()
+            .translationY(0f)
+            .setDuration(builder.animationDuration)
+            .setInterpolator(FastOutSlowInInterpolator())
+            .withEndAction {
+                slideOutAnimation(view, directionOffset)
+            }
+            .start()
+    }
+
+    private fun slideOutAnimation(view: View, directionOffset: Int) {
+        view.animate()
+            .translationY(view.measuredHeight.toFloat() * directionOffset)
+            .setStartDelay(builder.showDuration)
+            .setDuration(builder.animationDuration)
+            .setInterpolator(FastOutSlowInInterpolator())
+            .withEndAction {
+                view.clearAnimation()
+                view.isGone = true
+                builder.parent.removeView(view)
+            }
+            .start()
     }
 
     class Builder internal constructor(
         private val view: View
     ) {
         lateinit var parent: ViewGroup
-
+            private set
         internal var gravity = GravityType.TOP
             private set
         internal var title: String? = null
             private set
         internal var backgroundColor = Color.WHITE
+            private set
+        internal var animationDuration = 200L
+            private set
+        internal var showDuration = 1500L
             private set
 
         fun setTitle(title: String) = apply {
@@ -82,21 +92,14 @@ class PluuMeesageAlert private constructor(
         }
 
         fun build(): PluuMeesageAlert {
-            if (!this::parent.isInitialized) {
-                val parent = findSuitableParent(view)
-                requireNotNull(parent) {
-                    "No suitable parent found from the given view. Please provide a valid view."
-                }
-                this.parent = parent
+            val parent = findSuitableParent(view)
+            requireNotNull(parent) {
+                "No suitable parent found from the given view. Please provide a valid view."
             }
-
+            this.parent = parent
             clearCurrent(parent)
 
             return PluuMeesageAlert(this)
-        }
-
-        fun setParent(parent: ViewGroup) = apply {
-            this.parent = parent
         }
 
         fun show() = build().show()
@@ -118,7 +121,7 @@ class PluuMeesageAlert private constructor(
                 if (parentView is CoordinatorLayout) {
                     return parentView
                 } else if (parentView is FrameLayout) {
-                    fallback = if (parentView.getId() == Window.ID_ANDROID_CONTENT) {
+                    fallback = if (parentView.getId() == android.R.id.content) {
                         return parentView
                     } else {
                         parentView
