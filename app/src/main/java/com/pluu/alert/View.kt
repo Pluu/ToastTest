@@ -13,3 +13,9 @@ inline fun <reified T : View> T.doOnGlobalLayout(
         }
     })
 }
+
+fun isFullscreen(topLeftView: View): Boolean {
+    val location = IntArray(2)
+    topLeftView.getLocationOnScreen(location)
+    return location[0] == 0 && location[1] == 0
+}

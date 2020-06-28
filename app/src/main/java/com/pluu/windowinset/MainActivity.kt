@@ -23,7 +23,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnSlideInOfTop.setOnClickListener {
             val msg = "이것은 상단"
             if (binding.checkOfActivity.isChecked) {
-                PluuMeesageAlert.make(binding.root, msg)
+                PluuMeesageAlert.make(this, msg)
+                    .setParent(binding.root)
                     .setGravity(GravityType.TOP)
                     .setBackgroundColor(0xFFFFC107.toInt())
                     .show()
@@ -37,7 +38,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnSlideInOfBottom.setOnClickListener {
             val msg = "이것은 하단"
             if (binding.checkOfActivity.isChecked) {
-                PluuMeesageAlert.make(binding.root, msg)
+                PluuMeesageAlert.make(this, msg)
+                    .setParent(binding.root)
                     .setGravity(GravityType.BOTTOM)
                     .setBackgroundColor(0xFF03DAC5.toInt())
                     .show()

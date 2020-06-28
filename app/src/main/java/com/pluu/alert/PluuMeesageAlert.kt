@@ -2,17 +2,20 @@ package com.pluu.alert
 
 import android.app.Activity
 import android.graphics.Color
+import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.updatePadding
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import com.pluu.windowinset.BuildConfig
 
 class PluuMeesageAlert private constructor(
     private val builder: Builder
@@ -28,29 +31,19 @@ class PluuMeesageAlert private constructor(
     }
 
     fun show() {
-        messageView.doOnApplyWindowInsets { v, windowInsets, initialPadding ->
-            if (builder.gravity.isTop()) {
-                messageView.setText(buildString {
-                    append(builder.title)
-                    append(System.lineSeparator())
-                    append("top=${windowInsets.systemWindowInsetTop}")
-                })
-                v.updatePadding(top = windowInsets.systemWindowInsetTop + initialPadding.top)
-            } else {
-                messageView.setText(buildString {
-                    append(builder.title)
-                    append(System.lineSeparator())
-                    append("bottom=${windowInsets.systemWindowInsetBottom}")
-                })
-                v.updatePadding(bottom = windowInsets.systemWindowInsetBottom + initialPadding.bottom)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val hasFullscreen = isFullscreen(builder.parent)
+            if (hasFullscreen || !builder.isFixedParent) {
+                if (BuildConfig.DEBUG) {
+                    printDebugText()
+                }
+                if (builder.gravity.isTop()) {
+                    messageView.updatePadding(top = messageView.paddingTop + builder.window.safeInsetTop())
+                } else {
+                    messageView.updatePadding(bottom = messageView.paddingBottom + builder.window.safeInsetBottom())
+                }
             }
         }
-
-//        if (builder.gravity.isTop()) {
-//            messageView.applySystemWindowInsetsToPadding(top = true)
-//        } else {
-//            messageView.applySystemWindowInsetsToPadding(bottom = true)
-//        }
 
         builder.parent.addView(
             messageView,
@@ -101,8 +94,11 @@ class PluuMeesageAlert private constructor(
     }
 
     class Builder internal constructor(
-        private val view: View
+        private val activity: Activity
     ) {
+        private val view = activity.window.decorView
+        internal val window = activity.window
+
         lateinit var parent: ViewGroup
             private set
         internal var gravity = GravityType.TOP
@@ -114,6 +110,8 @@ class PluuMeesageAlert private constructor(
         internal var animationDuration = 200L
             private set
         internal var showDuration = 1500L
+            private set
+        internal var isFixedParent = false
             private set
 
         fun setTitle(title: String) = apply {
@@ -180,6 +178,7 @@ class PluuMeesageAlert private constructor(
 
         fun setParent(parent: ViewGroup) = apply {
             this.parent = parent
+            this.isFixedParent = true
         }
     }
 
@@ -189,21 +188,33 @@ class PluuMeesageAlert private constructor(
 
     companion object {
         fun make(activity: Activity): Builder {
-            return Builder(activity.window.decorView)
-        }
-
-        fun make(view: ViewGroup): Builder {
-            return Builder(view).setParent(view)
+            return Builder(activity)
         }
 
         fun make(activity: Activity, title: String): Builder {
             return make(activity)
                 .setTitle(title)
         }
+    }
 
-        fun make(view: ViewGroup, title: String): Builder {
-            return make(view)
-                .setTitle(title)
+    ///////////////////////////////////////////////////////////////////////////
+    // DEBUG
+    ///////////////////////////////////////////////////////////////////////////
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    private fun printDebugText() {
+        if (builder.gravity.isTop()) {
+            messageView.setText(buildString {
+                append(builder.title)
+                append(System.lineSeparator())
+                append("top=${builder.window.safeInsetTop()}")
+            })
+        } else {
+            messageView.setText(buildString {
+                append(builder.title)
+                append(System.lineSeparator())
+                append("bottom=${builder.window.safeInsetBottom()}")
+            })
         }
     }
 }
