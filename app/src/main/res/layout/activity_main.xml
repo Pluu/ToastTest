@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Check Fullscreen"
+            android:text="Fullscreen (Support WindowInset)"
             android:textColor="@android:color/black"
             android:textSize="20sp" />
 

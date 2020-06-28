@@ -62,30 +62,25 @@ class PluuMeesageAlert private constructor(
         )
 
         messageView.doOnGlobalLayout {
-            val directionOffset = if (builder.gravity.isTop()) {
-                -1
-            } else {
-                1
-            }
-            translationY = measuredHeight.toFloat() * directionOffset
-            slideInAnimation(this, directionOffset)
+            translationY = getOriginalPosition(messageView)
+            slideInAnimation(this)
         }
     }
 
-    private fun slideInAnimation(view: View, directionOffset: Int) {
+    private fun slideInAnimation(view: View) {
         view.animate()
             .translationY(0f)
             .setDuration(builder.animationDuration)
             .setInterpolator(FastOutSlowInInterpolator())
             .withEndAction {
-                slideOutAnimation(view, directionOffset)
+                slideOutAnimation(view)
             }
             .start()
     }
 
-    private fun slideOutAnimation(view: View, directionOffset: Int) {
+    private fun slideOutAnimation(view: View) {
         view.animate()
-            .translationY(view.measuredHeight.toFloat() * directionOffset)
+            .translationY(getOriginalPosition(view))
             .setStartDelay(builder.showDuration)
             .setDuration(builder.animationDuration)
             .setInterpolator(FastOutSlowInInterpolator())
@@ -95,6 +90,14 @@ class PluuMeesageAlert private constructor(
                 builder.parent.removeView(view)
             }
             .start()
+    }
+
+    private fun getOriginalPosition(
+        view: View
+    ) = view.measuredHeight.toFloat() * if (builder.gravity.isTop()) {
+        -1
+    } else {
+        1
     }
 
     class Builder internal constructor(
