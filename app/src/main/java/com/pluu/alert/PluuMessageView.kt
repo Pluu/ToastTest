@@ -3,8 +3,8 @@ package com.pluu.alert
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import com.example.toastexanoke.R
-import com.example.toastexanoke.databinding.WidgetMessageBinding
+import com.pluu.windowinset.R
+import com.pluu.windowinset.databinding.WidgetMessageBinding
 
 class PluuMessageView @JvmOverloads constructor(
     context: Context,

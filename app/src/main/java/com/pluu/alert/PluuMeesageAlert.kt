@@ -11,6 +11,7 @@ import androidx.annotation.ColorRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
+import androidx.core.view.updatePadding
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 
 class PluuMeesageAlert private constructor(
@@ -27,6 +28,30 @@ class PluuMeesageAlert private constructor(
     }
 
     fun show() {
+        messageView.doOnApplyWindowInsets { v, windowInsets, initialPadding ->
+            if (builder.gravity.isTop()) {
+                messageView.setText(buildString {
+                    append(builder.title)
+                    append(System.lineSeparator())
+                    append("top=${windowInsets.systemWindowInsetTop}")
+                })
+                v.updatePadding(top = windowInsets.systemWindowInsetTop + initialPadding.top)
+            } else {
+                messageView.setText(buildString {
+                    append(builder.title)
+                    append(System.lineSeparator())
+                    append("bottom=${windowInsets.systemWindowInsetBottom}")
+                })
+                v.updatePadding(bottom = windowInsets.systemWindowInsetBottom + initialPadding.bottom)
+            }
+        }
+
+//        if (builder.gravity.isTop()) {
+//            messageView.applySystemWindowInsetsToPadding(top = true)
+//        } else {
+//            messageView.applySystemWindowInsetsToPadding(bottom = true)
+//        }
+
         builder.parent.addView(
             messageView,
             FrameLayout.LayoutParams(
@@ -35,6 +60,7 @@ class PluuMeesageAlert private constructor(
                 if (builder.gravity.isTop()) Gravity.TOP else Gravity.BOTTOM
             )
         )
+
         messageView.doOnGlobalLayout {
             val directionOffset = if (builder.gravity.isTop()) {
                 -1
@@ -92,11 +118,13 @@ class PluuMeesageAlert private constructor(
         }
 
         fun build(): PluuMeesageAlert {
-            val parent = findSuitableParent(view)
-            requireNotNull(parent) {
-                "No suitable parent found from the given view. Please provide a valid view."
+            if (!::parent.isInitialized) {
+                val parent = findSuitableParent(view)
+                requireNotNull(parent) {
+                    "No suitable parent found from the given view. Please provide a valid view."
+                }
+                this.parent = parent
             }
-            this.parent = parent
             clearCurrent(parent)
 
             return PluuMeesageAlert(this)
@@ -146,6 +174,10 @@ class PluuMeesageAlert private constructor(
         fun setBackgroundColorRes(@ColorRes colorRes: Int) = apply {
             this.backgroundColor = ContextCompat.getColor(view.context, colorRes)
         }
+
+        fun setParent(parent: ViewGroup) = apply {
+            this.parent = parent
+        }
     }
 
     private fun GravityType.isTop() = this == GravityType.TOP
@@ -157,8 +189,8 @@ class PluuMeesageAlert private constructor(
             return Builder(activity.window.decorView)
         }
 
-        fun make(view: View): Builder {
-            return Builder(view)
+        fun make(view: ViewGroup): Builder {
+            return Builder(view).setParent(view)
         }
 
         fun make(activity: Activity, title: String): Builder {
@@ -166,7 +198,7 @@ class PluuMeesageAlert private constructor(
                 .setTitle(title)
         }
 
-        fun make(view: View, title: String): Builder {
+        fun make(view: ViewGroup, title: String): Builder {
             return make(view)
                 .setTitle(title)
         }

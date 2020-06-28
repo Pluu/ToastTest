@@ -15,10 +15,20 @@
         android:padding="20dp">
 
         <CheckBox
+            android:id="@+id/checkFullScreen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Check Fullscreen"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+
+        <CheckBox
             android:id="@+id/checkOfActivity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Parent of Activity"
+            android:textColor="@android:color/black"
             android:textSize="20sp" />
 
         <Button
@@ -43,7 +53,9 @@
             android:id="@+id/editTest"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Edit Text" />
+            android:hint="Edit Text"
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/black" />
     </LinearLayout>
 
 </FrameLayout>
