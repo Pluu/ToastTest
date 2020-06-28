@@ -21,26 +21,28 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnSlideInOfTop.setOnClickListener {
+            val msg = "이것은 상단"
             if (binding.checkOfActivity.isChecked) {
-                PluuMeesageAlert.make(binding.root, "Top Message")
+                PluuMeesageAlert.make(binding.root, msg)
                     .setGravity(GravityType.TOP)
                     .setBackgroundColor(0xFFFFC107.toInt())
                     .show()
             } else {
-                PluuMeesageAlert.make(this, "Top Message")
+                PluuMeesageAlert.make(this, msg)
                     .setGravity(GravityType.TOP)
                     .setBackgroundColor(0xFFFFC107.toInt())
                     .show()
             }
         }
         binding.btnSlideInOfBottom.setOnClickListener {
+            val msg = "이것은 하단"
             if (binding.checkOfActivity.isChecked) {
-                PluuMeesageAlert.make(binding.root, "공부하세요.")
+                PluuMeesageAlert.make(binding.root, msg)
                     .setGravity(GravityType.BOTTOM)
                     .setBackgroundColor(0xFF03DAC5.toInt())
                     .show()
             } else {
-                PluuMeesageAlert.make(this, "공부하세요.")
+                PluuMeesageAlert.make(this, msg)
                     .setGravity(GravityType.BOTTOM)
                     .setBackgroundColor(0xFF03DAC5.toInt())
                     .show()
